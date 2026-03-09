@@ -1,0 +1,65 @@
+﻿@model Departamento
+@{
+    Empleado empleado = ViewData["EMPLEADO"] as Empleado;
+    int posicion = int.Parse(ViewData["POSICION"].ToString());
+}
+
+<h1>Empleados Registro Departamento</h1>
+
+<a asp-controller="Home" asp-action="Index">Volver a departamentos</a>
+
+<ul class="list-group">
+    <li class="list-group-item bg-danger">Id Departamento: @Model.IdDepartamento</li>
+    <li class="list-group-item bg-info">Nombre: @Model.Nombre</li>
+    <li class="list-group-item bg-info">Localidad: @Model.Localidad</li>
+</ul>
+@if(empleado != null)
+{
+    <h3 style="color:blue">
+        Registro @posicion de @ViewData["ULTIMO"]
+    </h3>
+    <div>
+        <ul class="list-group-horizontal">
+            <li class="list-group-item">
+                <a asp-controller="Departamento" asp-action="Details" asp-route-iddepartamento="@Model.IdDepartamento" asp-route-posicion="1">
+                    Primero
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a asp-controller="Departamento" asp-action="Details" asp-route-iddepartamento="@Model.IdDepartamento" asp-route-posicion='@ViewData["ANTERIOR"]'>
+                    Anterior
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a asp-controller="Departamento" asp-action="Details" asp-route-iddepartamento="@Model.IdDepartamento" asp-route-posicion='@ViewData["SIGUIENTE"]'>
+                    Siguiente
+                </a>
+            </li>
+            <li class="list-group-item">
+                <a asp-controller="Departamento" asp-action="Details" asp-route-iddepartamento="@Model.IdDepartamento" asp-route-posicion='@ViewData["ULTIMO"]'>
+                    Ultimo
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <ul class="list-group">
+        <li class="list-group-item">
+            Emp_no: @empleado.IdEmpleado
+        </li>
+        <li class="list-group-item">
+            Apellido: @empleado.Apellido
+        </li>
+        <li class="list-group-item">
+            Oficio: @empleado.Oficio
+        </li>
+        <li class="list-group-item">
+            Salario: @empleado.Salario
+        </li>
+        <li class="list-group-item">
+            Id_dept: @empleado.IdDepartamento
+        </li>
+    </ul>
+}
+
+

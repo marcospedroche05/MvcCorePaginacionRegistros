@@ -19,6 +19,12 @@ using System.Diagnostics.Metrics;
 //	, EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO FROM EMP;
 //GO
 
+//CREATE VIEW V_EMPLEADOS_DEPARTAMENTO_PAGINACION
+//AS
+//	select cast(ROW_NUMBER() OVER (ORDER BY APELLIDO) as int) AS POSICION
+//	, EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO FROM EMP
+//GO
+
 #endregion
 
 #region STORED PROCEDURES
@@ -40,6 +46,17 @@ using System.Diagnostics.Metrics;
 //	WHERE OFICIO = @oficio) QUERY 
 //	WHERE ( QUERY.POSICION >= @posicion AND QUERY.POSICION < (@posicion + 3))
 //GO
+
+//CREATE PROCEDURE SP_EMPLEADO_DEPARTAMENTO_PAGINACION
+//	(@iddepartamento int, @posicion int)
+//	AS
+//			SELECT EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO FROM
+//		(SELECT CAST(ROW_NUMBER() OVER (ORDER BY APELLIDO) AS int) 
+//		AS POSICION, EMP_NO, APELLIDO, OFICIO, SALARIO, DEPT_NO 
+//		FROM EMP
+//		WHERE DEPT_NO = @iddepartamento) QUERY
+//		WHERE QUERY.POSICION = @posicion
+//	GO
 
 #endregion
 
@@ -127,5 +144,47 @@ namespace MvcCorePaginacionRegistros.Repositories
                 NumeroRegistros = registros
             };
         }
+
+
+
+
+        //PRACTICA
+
+        public async Task<List<Departamento>> GetDepartamentosAsync()
+        {
+            var consulta = from datos in this.context.Departamentos
+                           select datos;
+            return await consulta.ToListAsync();
+        }
+        public async Task<Departamento> FindDepartamentoAsync(int iddepartamento)
+        {
+            var consulta = from datos in this.context.Departamentos
+                           where datos.IdDepartamento == iddepartamento
+                           select datos;
+            return await consulta.FirstOrDefaultAsync();
+        }
+
+        public async Task<int> GetRegistrosEmpleadosDepartamentoAsync(int iddepartamento)
+        {
+            return await this.context.Empleados.Where(x => x.IdDepartamento == iddepartamento).CountAsync();
+        }
+
+        public async Task<List<Empleado>> GetEmpleadosDepartamentoAsync(int iddepartamento)
+        {
+            string sql = "SP_EMPLEADOS_DEPARTAMENTO_PAGINACION @iddepartamento";
+            SqlParameter pamDept = new SqlParameter("@iddepartamento", iddepartamento);
+            var consulta = this.context.Empleados.FromSqlRaw(sql, pamDept);
+            return await consulta.ToListAsync();
+        }
+
+        public async Task<Empleado> GetEmpleadoDepartamentoAsync(int posicion, int iddepartamento)
+        {
+            string sql = "SP_EMPLEADO_DEPARTAMENTO_PAGINACION @iddepartamento, @posicion";
+            SqlParameter pamDept = new SqlParameter("@iddepartamento", iddepartamento);
+            SqlParameter pamPos = new SqlParameter("@posicion", posicion);
+            var consulta = this.context.Empleados.FromSqlRaw(sql, pamDept, pamPos);
+            return consulta.AsEnumerable().FirstOrDefault();
+        }
+
     }
 }
