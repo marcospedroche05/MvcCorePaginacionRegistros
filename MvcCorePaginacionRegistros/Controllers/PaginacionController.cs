@@ -61,6 +61,85 @@ namespace MvcCorePaginacionRegistros.Controllers
             return View(departamentos);
         }
 
+        public async Task<IActionResult> GrupoDepartamentos(int? posicion)
+        {
+            if (posicion == null)
+            {
+                posicion = 1;
+            }
+            int numRegistros =
+                await this.repo.GetNumeroRegistrosVistaDepartamentosAsync();
+            ViewData["NUMREGISTROS"] = numRegistros;
+            List<Departamento> departamentos = await this.repo.GetGrupoDepartamentosAsync(posicion.Value);
+            return View(departamentos);
+        }
+
+        public async Task<IActionResult> GrupoEmpleados(int? posicion)
+        {
+            if (posicion == null)
+            {
+                posicion = 1;
+            }
+            int numRegistros =
+                await this.repo.GetEmpleadosCountAsync();
+            ViewData["NUMREGISTROS"] = numRegistros;
+            List<Empleado> empleados = await this.repo.GetGrupoEmpleadosAsync(posicion.Value);
+            return View(empleados);
+        }
+
+        public async Task<IActionResult> GrupoEmpleadosOficio(int? posicion, string oficio)
+        {
+            if(posicion == null)
+            {
+                posicion = 1;
+                return View();
+            } else
+            {
+                List<Empleado> empleados = await this.repo.GetGrupoEmpleadosOficioAsync(posicion.Value, oficio);
+                int registros = await this.repo.GetEmpleadosOficioCountAsync(oficio);
+                ViewData["NUMREGISTROS"] = registros;
+                ViewData["OFICIO"] = oficio;
+                return View(empleados);
+            }
+            
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GrupoEmpleadosOficio(string oficio)
+        {
+            List<Empleado> empleados = await this.repo.GetGrupoEmpleadosOficioAsync(1, oficio);
+            int registros = await this.repo.GetEmpleadosOficioCountAsync(oficio);
+            ViewData["NUMREGISTROS"] = registros;
+            ViewData["OFICIO"] = oficio;
+            return View(empleados);
+        }
+
+        public async Task<IActionResult> GrupoEmpleadosOficioOut(int? posicion, string oficio)
+        {
+            if (posicion == null)
+            {
+                posicion = 1;
+                return View();
+            }
+            else
+            {
+                ModelEmpleadosOficio model = await this.repo.GetGrupoEmpleadosOficioOutAsync(posicion.Value, oficio);
+                ViewData["NUMREGISTROS"] = model.NumeroRegistros;
+                ViewData["OFICIO"] = oficio;
+                return View(model.Empleados);
+            }
+
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GrupoEmpleadosOficioOut(string oficio)
+        {
+            ModelEmpleadosOficio model = await this.repo.GetGrupoEmpleadosOficioOutAsync(1, oficio);
+            ViewData["NUMREGISTROS"] = model.NumeroRegistros;
+            ViewData["OFICIO"] = oficio;
+            return View(model.Empleados);
+        }
+
         public IActionResult Index()
         {
             return View();
